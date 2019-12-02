@@ -12,10 +12,9 @@ Bugzilla extension to map Bugzilla and LDAP groups.
 
 ## Important notes
 
-The extension does not verify if the user is indirect member of a certain group. That means,
-the user will be added as member only for those groups he is directly member of.
+The extension uses the AD member:1.2.840.113556.1.4.1941 extension to get recursive membership.
 
-The extension has been tested using OpenLDAP with the virtual attribute 'memberOf' enabled. You have to customize the code if it does not reflect your LDIF.
+The extension has been tested using Active Directory with the virtual attribute 'memberOf' enabled. You have to customize the code if it does not reflect your LDIF.
 
 Example:
 
@@ -25,7 +24,7 @@ Example:
     # LDAPv3
     # base <dc=ldap,dc=bugzilla> (default) with scope subtree
     # filter: uid=jsmith
-    # requesting: memberof 
+    # requesting: memberof
     #
 
     # John Smith, Users, ldap.bugzilla

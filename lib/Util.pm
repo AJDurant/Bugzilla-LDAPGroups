@@ -17,6 +17,7 @@ our @EXPORT = qw(
 use Bugzilla;
 use Bugzilla::Error;
 
+# From package Bugzilla::Auth::Verify::LDAP
 sub bind_ldap_for_search {
     my $ldap = Bugzilla->ldap;
     my $bind_result;
@@ -48,12 +49,13 @@ sub sync_ldap {
                                  WHERE user_id = ? AND group_id = ?
                                  AND grant_type = ? and isbless = 0");
 
+    my $uid_attr = Bugzilla->params->{"LDAPuidattribute"};
     my $mail_attr = Bugzilla->params->{"LDAPmailattribute"};
     my $base_dn = Bugzilla->params->{"LDAPBaseDN"};
 
     # Search for members of the LDAP group.
     my $filter = "memberof:1.2.840.113556.1.4.1941:=" . $group->ldap_dn;
-    my @attrs = ($mail_attr);
+    my @attrs = ($uid_attr);
     my $dn_result = $ldap->search(( base   => $base_dn,
                                     scope  => 'sub',
                                     filter => $filter ), attrs => \@attrs);
@@ -63,7 +65,7 @@ sub sync_ldap {
     }
 
     my @group_members;
-    push @group_members, $_->get_value('mail') foreach $dn_result->entries;
+    push @group_members, $_->get_value($uid_attr) foreach $dn_result->entries;
 
     my $users = Bugzilla->dbh->selectall_hashref(
         "SELECT userid, group_id, login_name
@@ -73,7 +75,7 @@ sub sync_ldap {
                    AND group_id = ?
                    AND grant_type = ?
                    AND isbless = 0
-         WHERE extern_id IS NOT NULL", 
+         WHERE extern_id IS NOT NULL",
         'userid', undef, ($group->id, Bugzilla::Extension::LDAPGroups->GRANT_LDAP));
 
     my @added;

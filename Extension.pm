@@ -16,7 +16,7 @@ use Bugzilla::Util qw(diff_arrays trim clean_text);
 
 use Bugzilla::Extension::LDAPGroups::Util qw(sync_ldap bind_ldap_for_search);
 
-# Import this class now so its methods can be overriden 
+# Import this class now so its methods can be overriden
 use Bugzilla::WebService::Group;
 
 use Scalar::Util qw(blessed);
@@ -44,6 +44,7 @@ BEGIN {
 };
 
 # From Bugzilla::Auth::Verify::LDAP
+# Adds use of cache for ldap object
 sub _bugzilla_ldap {
     my $class = shift;
 
@@ -76,11 +77,11 @@ sub _bugzilla_ldap {
 sub _create_or_update_user {
     my ($self, $params) = @_;
     my $dbh = Bugzilla->dbh;
-    
+
     my $result = $self->_orig_create_or_update_user($params);
 
     if (exists $params->{ldap_group_dns}) {
-       
+
         my $sth_add_mapping = $dbh->prepare(
             qq{INSERT INTO user_group_map
                  (user_id, group_id, isbless, grant_type)
@@ -110,10 +111,10 @@ sub _create_or_update_user {
         $sth_remove_mapping->execute($user->id, $_)
             foreach @{ $removed || [] };
 
-	# Clear the cache if there were any group changes
-	if (scalar @{ $added } != 0 || scalar @{ $removed } != 0) {
-		Bugzilla->memcached->clear_config({ key => 'user_groups.' . $user->id });
-	}
+        # Clear the cache if there were any group changes
+        if (scalar @{ $added } != 0 || scalar @{ $removed } != 0) {
+            Bugzilla->memcached->clear_config({ key => 'user_groups.' . $user->id });
+        }
     }
 
     return $result;
@@ -226,7 +227,7 @@ sub _group_to_hash {
 
     my $field_data = $self->_orig_group_to_hash($params, $group);
     if ($user->in_group('creategroups')) {
-        $field_data->{ldap_dn}    = $self->type('string', $group->ldap_dn);
+        $field_data->{ldap_dn} = $self->type('string', $group->ldap_dn);
     }
 
     return $field_data;

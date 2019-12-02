@@ -13,6 +13,12 @@ use strict;
 use constant NAME => 'LDAPGroups';
 
 use constant REQUIRED_MODULES => [
+    # Required to sync LDAP groups with Bugzilla groups.
+    {
+        package => 'perl-ldap',
+        module  => 'Net::LDAP',
+        version => 0
+    }
 ];
 
 use constant OPTIONAL_MODULES => [

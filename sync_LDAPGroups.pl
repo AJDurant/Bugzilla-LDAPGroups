@@ -8,7 +8,7 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 #
-# Script to syncronize group members with LDAP on an ad-hoc basis
+# Script to synchronize group members with LDAP on an ad-hoc basis
 #
 
 use strict;
@@ -22,7 +22,7 @@ use Bugzilla::Extension::LDAPGroups::Util qw(sync_ldap);
 
 # Get all groups where the ldap_dn has been set
 sub get_groups_using_ldap_dn(){
-    my @groups   = Bugzilla::Group->get_all;
+    my @groups = Bugzilla::Group->get_all;
 
     my @groups_with_ldap_dn;
 
@@ -31,7 +31,7 @@ sub get_groups_using_ldap_dn(){
             push @groups_with_ldap_dn, $group;
         }
     }
-    
+
     return @groups_with_ldap_dn;
 }
 
